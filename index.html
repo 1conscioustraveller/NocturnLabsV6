@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nocturn Labs V2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <style>
+    /* Existing styles ... */
+
+    /* --- Intro Fade Overlay Styles Start --- */
+    #introOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000; /* start black */
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 2s ease-in-out;
+    }
+    #introOverlay.visible {
+      opacity: 1;
+    }
+    /* You might also want a gradient purple/blue effect */
+    #introOverlay.purpleBlue {
+      background: linear-gradient(135deg, #5e00ff, #00d4ff); /* one example */
+    }
+    /* --- Intro Fade Overlay Styles End --- */
+
+    /* --- Matrix Rain Background Styles Start --- */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    /* --- Matrix Rain Background Styles End --- */
+
+  </style>
+</head>
+<body>
+  <!-- --- Intro Fade Overlay Element Start --- -->
+  <div id="introOverlay"></div>
+  <!-- --- Intro Fade Overlay Element End --- -->
+
+  <!-- --- Matrix Rain Canvas Start --- -->
+  <canvas id="backgroundCanvas"></canvas>
+  <!-- --- Matrix Rain Canvas End --- -->
+
+  <div id="app">
+    <!-- Your existing site content -->
+  </div>
+
+  <script>
+    // --- Intro Fade Script Start ---
+    (function(){
+      const overlay = document.getElementById('introOverlay');
+
+      // Step 1: fade in with purple/blue
+      // show overlay, add class to give it purple/blue background
+      overlay.classList.add('visible', 'purpleBlue');
+
+      // After some time, fade out
+      setTimeout(() => {
+        // remove purpleBlue if you want to fade back to black, or keep gradient
+        overlay.classList.remove('purpleBlue');
+        overlay.style.background = '#000'; // or whatever target before fade out
+      }, 2000); // 2 seconds of purple/blue
+
+      // Then fade out overlay after a delay
+      setTimeout(() => {
+        overlay.classList.remove('visible');
+      }, 4000); // fade out start at 4s
+
+      // Optionally, remove overlay from DOM after it's fully faded out
+      setTimeout(() => {
+        if(overlay && overlay.parentNode) {
+          overlay.parentNode.removeChild(overlay);
+        }
+        // Start the matrix-rain animation only after overlay is gone, or ensure it doesn't run visibly until remove
+        startMatrixRain();
+      }, 6000); // allow for fade out transition etc.
+    })();
+    // --- Intro Fade Script End ---
+
+    // --- Matrix Rain Script Start ---
+    function startMatrixRain(){
+      const canvas = document.getElementById('backgroundCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      const fontSize = 16;
+      const columns = Math.floor(canvas.width / fontSize);
+      const drops = [];
+      for (let x = 0; x < columns; x++) {
+        drops[x] = 1;
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#0F0'; // green text
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = String.fromCharCode( 33 + Math.random() * 94 );
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+          if (drops[i] * fontSize > canvas.height || Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      function animateLoop() {
+        draw();
+        requestAnimationFrame(animateLoop);
+      }
+
+      animateLoop();
+    }
+    // --- Matrix Rain Script End ---
+
+    // If you instead already have matrix script loaded elsewhere, you can wrap that into startMatrixRain
+    // and ensure you delay its visible start until after the overlay fade out.
+  </script>
+
+</body>
+</html>
